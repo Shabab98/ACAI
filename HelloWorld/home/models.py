@@ -6,19 +6,20 @@ fake = Faker()
 
 # Create your models here.
 # myapp/models.py
-from django.contrib.auth.models import User
-from django.db import models
+#from django.contrib.auth.models import User
+#from django.db import models
 
-class UserProfile(models.Model):
-    USER_ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('user', 'User'),
-    ]
+#class UserProfile(models.Model):
+#    USER_ROLE_CHOICES = [
+#        ('admin', 'Admin'),
+#        ('user', 'User'),
+#    ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES)
+#    user = models.OneToOneField(User, on_delete=models.CASCADE)
+#    role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES)
 
 class Library(models.Model):
+    id = models.AutoField(primary_key=True)
     publisher = models.CharField(max_length=100)
     author = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
