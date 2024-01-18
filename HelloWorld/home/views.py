@@ -56,10 +56,14 @@ class UserLogin(TemplateView):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            print(f"Attempting to authenticate user: {username}")
             user = authenticate(request, username=username, password=password)
             if user:
+                print(f"User {username} authenticated successfully.")
                 login(request, user)    
                 return redirect('library')
+            else:
+                print(f"Authentication failed for user {username}.")
         return render(request, 'login.html', {'form': form})
 
     
