@@ -1,22 +1,95 @@
-<!DOCTYPE html>
 {% extends "base.html" %}
 
 <!-- title block -->
 {% block title_block %}
-    <title>Acai - Login</title>
+    <title>Acai - Library</title>
 {% endblock %}
 <!-- /END title block -->
 
+<!-- import block -->
+{% block import_block %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+{% endblock %}
+<!-- /END title block -->
 
 <!-- body block -->
 {% block body_block %}
+    {% if books %}
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Checkout Date</th>
+                    <th scope="col">In Stock?</th>
+                    <th scope="col">Controls</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr id="book-row-{{ book.id }}">
+                        <td>{{ book.id }}</td>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.dateCheckedOut }}</td>
+                        <td>{{ book.isInStock }}</td>
+                        <td>
+                            {% if book.isInStock %}
+                                <div class="btn-toolbar" role="toolbar" id="data-controls">
+                                    <button id="checkout-button-{{ book.id }}" value="{{ book.id }}" class="book-btn btn-info btn-sm">
+                                        <i class="bi bi-arrow-right-square-fill"></i>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-    <a href="{% url 'signup' %}">Create Account</a>
-</form>
+        <!-- Book Checkout HTMX request -->
+        <script>
+            $(document).ready(function () {
+                $(".book-btn").click(function (e) {
+                    checkoutBook($(this));
+                });
+            });
 
+            function checkoutBook(element) {
+                book_id = element[0].getAttribute('value');
+                query_url = "{% url 'api-checkout' %}";
+                htmx.trigger("#book-row-" + book_id, "load");
+                $.ajax({
+                    url: query_url,
+                    type: 'POST',
+                    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                    data: { pk: book_id },
+                    dataType: "json",
+                    success: function (res) {
+                        var newtr = "<tr id='book-row-" + res.id + "'><td>" + res.id + "</td><td>" + res.title + "</td><td>" + res.author + "</td><td>" + res.dateCheckedOut + "</td><td>" + res.isInStock + "</td><td></td></tr>"
+                        $("#book-row-" + book_id).replaceWith(newtr);
+                    },
+                    error: function (res) {
+                        console.log("error");
+                        console.log(res);
+                    }
+                });
+            }
+        </script>
+
+    {% else %}
+        <p>No Books Found</p>
+        <a href="/library/populate">Populate</a>
+    {% endif %}
+
+    <!-- Spinner for HTMX requests -->
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border htmx-indicator" role="status">
+            <span class="sr-only"></span>
+        </div>
+    </div>
 {% endblock %}
 <!-- /END body block -->
