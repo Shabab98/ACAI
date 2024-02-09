@@ -1,49 +1,45 @@
 from django.db import models
 from faker import Faker
-import random
 
-fake = Faker()
-
-# Create your models here.
-# myapp/models.py
-#from django.contrib.auth.models import User
-#from django.db import models
-
-#class UserProfile(models.Model):
-#    USER_ROLE_CHOICES = [
-#        ('admin', 'Admin'),
-#        ('user', 'User'),
-#    ]
-
-#    user = models.OneToOneField(User, on_delete=models.CASCADE)
-#    role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES)
 
 class Library(models.Model):
-    id = models.AutoField(primary_key=True)
-    publisher = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
-    title = models.CharField(max_length=100)
-    page_count = models.PositiveIntegerField()
-    category = models.CharField(max_length=50)
-    shelf_location = models.CharField(max_length=50)
-    published_date = models.DateField()
-    is_in_stock = models.BooleanField(default=True)
-    date_checked_out = models.DateField(null=True, blank=True)
+   id = models.AutoField(primary_key=True, verbose_name='ID')
+   publisher = models.CharField(max_length = 50, verbose_name='Publisher')
+   author = models.CharField(max_length = 50, verbose_name='Author')
+   title = models.CharField(max_length = 100, verbose_name='Title')
+   pageCount= models.IntegerField(default=10, verbose_name='Page Count')
+   category = models.CharField(max_length = 50, verbose_name='Category')
+   shelfLocation = models.CharField(max_length = 50, verbose_name='Shelf Location')
+   publishedDate = models.DateField(verbose_name='Published Date')
+   isInStock = models.BooleanField(default=True, verbose_name='is in stock')
+   dateCheckedOut = models.DateField(verbose_name='Date Checked Out', auto_now=True)
 
-    def __str__(self):
-        return self.title
+   def __str__(self):
+        return f"{self.title} {self.publishedDate}"
+   
+   class Meta:
+      db_table = "library"
+      verbose_name = 'Library'
+      verbose_name_plural = 'Library'
 
-    @classmethod
-    def create_simulated_data(cls, num_entries=200):
-        for _ in range(num_entries):
-            Library.objects.create(
-                publisher=fake.company(),
-                author=fake.name(),
-                title=fake.catch_phrase(),
-                page_count=random.randint(50, 500),
-                category=fake.word(),
-                shelf_location=fake.random_element(elements=('A1', 'B2', 'C3')),
-                published_date=fake.date_this_decade(),
-                is_in_stock=fake.boolean(),
-                date_checked_out=fake.date_this_decade() if fake.boolean(chance_of_getting_true=30) else None
-            )
+   @staticmethod
+   def faker_populate_library():
+    '''
+    Populate model with dummy values
+    '''
+    if Library.objects.all().count() >= 200:
+       return
+    
+    fake = Faker()
+    for _ in range(200):
+        Library.objects.create(
+        publisher=fake.name()[:50], 
+        author=fake.name()[:50], 
+        title=fake.text()[:100], 
+        pageCount=fake.random_int(10, 1000),
+        category=fake.word()[:50],
+        shelfLocation=fake.word()[:50],
+        publishedDate=fake.date_of_birth(),
+        isInStock=fake.boolean(),
+        dateCheckedOut=fake.date_of_birth())
+    return

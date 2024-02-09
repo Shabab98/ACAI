@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+<!-- title block -->
+{% block title_block %}
+    <title>Acai - Library</title>
+{% endblock %}
+<!-- /END title block -->
+
+<!-- import block -->
+{% block import_block %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous"></script>
+{% endblock %}
+<!-- /END import block -->
+
+
+<!-- body block -->
+{% block body_block %}
+    {% if books %}
+        <table class="table table-sm table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Checkout Date</th>
+                    <th scope="col">In Stock?</th>
+                    <th scope="col">Controls</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr id="book-row-{{ book.id }}">
+                        <td>{{ book.id }}</td>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.dateCheckedOut }}</td>
+                        <td>{{ book.isInStock }}</td>
+                        <td>
+                            {% if book.isInStock %}
+                                <div class="btn-toolbar" role="toolbar" id="data-controls">
+                                    <button id="checkout-button-{{ book.id }}" value="{{ book.id }}" class="book-btn btn-info btn-sm" hx-post="{% url 'api-checkout' %}" hx-trigger="click" hx-target="#book-row-{{ book.id }}"><i class="bi bi-arrow-right-square-fill"></i></button>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+        <p>No Books Found</p>
+        <a href="/library/populate" hx-get="/library/populate" hx-trigger="click">Populate</a>
+    {% endif %}
+
+{% endblock %}
+<!-- /END body block -->
